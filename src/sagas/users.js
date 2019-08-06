@@ -24,16 +24,32 @@ function* createUser({ payload: { firstName, lastName } }) {
     } catch (e) {
         
     }
-    yield;
 }
 
 function* watchCreateUserRequest() {
     yield takeLatest(actions.Types.CREATE_USER_REQUEST, createUser);
 }
 
+function* deleteUser({ userId }) {
+    try {
+        yield api.deleteUser(userId);
+        yield getUsers();
+    } catch (e) {
+    }
+}
+
+function* watchDeleteUserRequest() {
+    while (true) {
+        const action = yield take(actions.Types.DELETE_USER_REQUEST);
+
+        yield deleteUser({ userId: action.payload.userId });
+    }
+}
+
 const usersSagas = [
     fork(watchGetUsersRequest),
-    fork(watchCreateUserRequest)
+    fork(watchCreateUserRequest),
+    fork(watchDeleteUserRequest)
 ];
 
 export default usersSagas;
